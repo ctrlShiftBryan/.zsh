@@ -65,4 +65,4 @@ function gsqa() {
   git push -fu origin $branch
 }
 
-source env.sh
+source ~/.zsh/env.sh
