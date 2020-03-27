@@ -15,12 +15,12 @@ alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
 function shovel () {
   pushd ~/dev
-  ./script/run shovel $1
+  ./script/run shovel $@
   popd
 }
 
 function ber() {
-  bundle exec rspec $1
+  bundle exec rspec $@
 }
 
 
