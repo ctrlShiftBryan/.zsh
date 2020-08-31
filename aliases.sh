@@ -35,6 +35,10 @@ function mte() {
   iex -S mix test --trace $@
 }
 
+function mto() {
+  iex -S mix test --only focus --trace $@
+}
+
 function ber() {
   bundle exec rspec $@
 }
