@@ -13,6 +13,10 @@ alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
+function dci () {
+  docker run -it -v $(pwd):/app $@ sh
+}
+
 function gcr () {
   git clone --recurse-submodules $@
 }
@@ -47,28 +51,35 @@ function berf() {
   bundle exec rspec --fail-fast $@
 }
 
-function gitbr() {
-  git for-each-ref --sort='committerdate' --format='%(refname)%09%(committerdate)' refs/heads | sed -e 's-refs/heads/--'
+function gitbra() {
+  git branch -r | grep -v HEAD | while read b; do git log --color --format="%ci _%C(magenta)%cr %C(bold cyan)$b%Creset %s %C(bold blue)<%an>%Creset" $b | head -n 1; done | sort -r | cut -d_ -f2- | sed 's;origin/;;g' | head -10
 }
 
-function dri() {
+function gitbr() {
+  git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:red)%(objectname:short)%(color:reset);%(color:yellow)%(refname:short)%(color:reset);(%(color:green)%(committerdate:relative)%(color:reset));%(authorname);%(contents:subject)' | column -t -s ';'
+}
+
+function dri {
   docker run -it --rm $1 $2
 }
 
-function dsr() {
+function dsr {
   docker stop $1; docker rm $1
 }
 
-function drl() {
+function drl {
   docker restart $1; docker logs -f --tail 20 $1
 }
 
+function dstop {
+  docker stop $(docker ps -qa)
+}
 
-function dhalt() {
+function dhalt {
   docker stop $(docker ps --filter label=net.cmmint.dev.ansible-managed -qa)
 }
 
-function dresume() {
+function dresume {
   docker start $(docker ps --filter label=net.cmmint.dev.ansible-managed -qa)
 }
 
