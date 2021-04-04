@@ -24,6 +24,10 @@ function ber() {
 }
 
 
+function berf() {
+  bundle exec rspec --fail-fast $@
+}
+
 function dsr() {
   docker stop $1; docker rm $1
 }
