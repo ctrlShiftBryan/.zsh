@@ -13,6 +13,10 @@ alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
+function curloop() {
+  while true; do sleep 1; curl $@; echo -e '\n'$(date)'\n';done
+}
+
 function dci () {
   docker run -it -v $(pwd):/app $@ sh
 }
@@ -116,5 +120,6 @@ function gsqa() {
   git diff origin/$branch
   git push -fu origin $branch
 }
+
 
 source ~/.zsh/env.sh
