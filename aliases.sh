@@ -47,6 +47,10 @@ function mtw() {
   mix test.watch --stale --max-failures 1 --trace --seed 0
 }
 
+function mtf() {
+  mix test --only focus --trace $@
+}
+
 function mto() {
   iex -S mix test --only focus --trace $@
 }
