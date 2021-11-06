@@ -12,6 +12,9 @@ alias dps="docker ps -a --format \"table {{.Names}}\t{{.ID}}\t{{.Status}}\""
 alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
+function clearz() {
+  printf "\ec\e[3J";
+}
 
 function curloop() {
   while true; do sleep 1; curl $@; echo -e '\n'$(date)'\n';done
