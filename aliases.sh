@@ -35,6 +35,10 @@ function mte() {
   iex -S mix test --trace $@
 }
 
+function mtw() {
+  mix test.watch --stale --max-failures 1 --trace --seed 0
+}
+
 function mto() {
   iex -S mix test --only focus --trace $@
 }
@@ -83,6 +87,10 @@ function dresume() {
 
 function dlog {
   docker logs -f --tail 20 $1
+}
+
+function gcr() {
+  git clone  --recurse-submodules $@
 }
 
 function gsqa() {
