@@ -106,6 +106,27 @@ function gcr() {
   git clone  --recurse-submodules $@
 }
 
+function gsqam() {
+  git pull
+  branch=$(git branch | grep \* | cut -d ' ' -f2)
+  myvar="_backup"
+  backup_branch="$branch$myvar"
+  git checkout -b $backup_branch
+  git checkout $branch
+
+  git checkout main
+  git pull
+  git checkout $branch
+  git merge main
+  git push
+  git checkout main
+  git merge --squash $branch
+  git branch -D $branch
+  git checkout -b $branch
+  git commit
+  git diff origin/$branch
+  git push -fu origin $branch
+}
 function gsqa() {
   git pull
   branch=$(git branch | grep \* | cut -d ' ' -f2)
