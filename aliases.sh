@@ -19,13 +19,28 @@ function shovel () {
   popd
 }
 
+function mt() {
+  mix test $@
+}
+
+function mte() {
+  iex -S mix test --trace $@
+}
+
 function ber() {
   bundle exec rspec $@
 }
 
-
 function berf() {
   bundle exec rspec --fail-fast $@
+}
+
+function gitbr() {
+  git for-each-ref --sort='committerdate' --format='%(refname)%09%(committerdate)' refs/heads | sed -e 's-refs/heads/--'
+}
+
+function dri() {
+  docker run -it --rm $1 $2
 }
 
 function dsr() {
