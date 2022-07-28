@@ -13,6 +13,14 @@ alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
+function gcr () {
+  git clone --recurse-submodules $@
+}
+
+function drmi () {
+  docker rmi $(docker images --filter=reference=*$@* -q)
+}
+
 function shovel () {
   pushd ~/dev
   ./script/run shovel $@
