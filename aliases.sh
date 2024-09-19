@@ -16,8 +16,11 @@ alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
 #k8s
 alias k="kubectl"
-alias kdp="k describe pod $POD"
 alias kgp="k get pods"
+
+function kdp() { 
+  k describe pod $POD "$@"
+}
 
 function kl() {
   k logs $POD "$@"
@@ -31,7 +34,31 @@ function ke() {
   k exec -it $POD -- /bin/sh
 }
 
+## create executable bash script
+function xbash() {
+  echo "" > $1
+  chmod +x $1
+  pbpaste >> $1
+  cursor $1
+}
 
+#docker compose
+function dcdu(){
+  docker compose down
+  docker compose up -d $@
+}
+
+function dcd(){
+  docker compose down
+}
+
+function dcu(){
+  docker compose up -d $@
+}
+
+function dcb(){
+  docker compose build $@
+}
 
 # alias p="export POD=($1)"
 function p() {
@@ -223,6 +250,54 @@ function docker_container_info() {
     echo "Image Size: $human_readable_size"
     echo "\n---\n"
   done
+}
+
+function kat() {
+  IMAGE=${IMAGE:-registry.cmmint.net/platform/kat:latest}
+  # Auto-update, but only check once every 48h
+  [[ ! -f $HOME/.kat-update-check || $(find $HOME/.kat-update-check -type f -mtime +48h) ]] && docker pull $IMAGE && touch $HOME/.kat-update-check
+  docker run -it -e "USER=${USER}" -v "${HOME}/.kube:/kube" $IMAGE "$@"
+}
+
+function katfwd() {
+  # Check if namespace argument is provided
+  if [ $# -ne 1 ]; then
+    echo "Usage: port_forward <namespace>"
+    return 1
+  fi
+
+  # Get pod name from kubectl get pods command
+  pod_name=$(kubectl get pods -n "$1" -o jsonpath='{.items[0].metadata.name}')
+
+  # Check if pod name is empty
+  if [ -z "$pod_name" ]; then
+    echo "No pods found in the specified namespace."
+    return 1
+  fi
+
+  # Run kubectl port-forward command
+  kubectl port-forward -n "$1" "$pod_name" 3314:1433
+}
+
+
+kat-open() {
+    # Capture the output of the 'kat list' command
+    local output="$(kat list)"
+
+    # Extract the cluster name using awk to parse the specific column
+    # assuming the cluster name is always in the first column of the output
+    local cluster_name="$(echo "$output" | awk '/^[[:alnum:]]+-[[:alnum:]]+/ {print $1}' | head -1)"
+
+    # If a cluster name was found, open the corresponding URL
+    if [[ -n "$cluster_name" ]]; then
+        open "https://readme.$cluster_name.kat.cmmaz.cloud"
+    else
+        echo "Cluster name not found."
+    fi
+}
+
+k8c() {
+  kubectl $@
 }
 
 source ~/.zsh/env.sh
