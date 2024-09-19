@@ -20,8 +20,18 @@ alias kdp="k describe pod $POD"
 alias kgp="k get pods"
 
 function kl() {
-  k logs $POD
+  k logs $POD "$@"
 }
+
+function klf() {
+  k logs -f $POD "$@"
+}
+
+function ke() {
+  k exec -it $POD -- /bin/sh
+}
+
+
 
 # alias p="export POD=($1)"
 function p() {
