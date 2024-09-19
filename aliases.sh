@@ -18,6 +18,10 @@ alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 alias k="kubectl"
 alias kgp="k get pods"
 
+function kdelp() {
+ k delete pod $POD "$@"
+}
+
 function kdp() { 
   k describe pod $POD "$@"
 }
