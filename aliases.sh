@@ -38,6 +38,10 @@ function ke() {
   k exec -it $POD -- /bin/sh
 }
 
+function kberc() {
+  k exec -it $POD -- bundle exec rails c
+}
+
 ## create executable bash script
 function xbash() {
   echo "" > $1
