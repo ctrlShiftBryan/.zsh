@@ -19,8 +19,32 @@ alias kubectl='kubecolor'
 alias k="kubectl"
 alias kgp="k get pods"
 
+function p() {
+    local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
+    if [[ ! -f "$script_path" ]]; then
+        echo "Error: Script not found at $script_path"
+        return 1
+    fi
+    local script_output
+    script_output=$("$script_path" pods)
+    eval "$script_output"
+    echo "POD variable set to: $POD"
+}
+
+function s() {
+    local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
+    if [[ ! -f "$script_path" ]]; then
+        echo "Error: Script not found at $script_path"
+        return 1
+    fi
+    local script_output
+    script_output=$("$script_path" services)
+    eval "$script_output"
+    echo "SERVICE variable set to: $SERVICE"
+}
+
 function ks() {
-  kubectl get services "$@"
+  kubectl get services "$SERVICE" "$@"
 }
 
 function kdap() {
@@ -79,17 +103,6 @@ function dcb(){
 }
 
 # alias p="export POD=($1)"
-function p() {
-    local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
-    if [[ ! -f "$script_path" ]]; then
-        echo "Error: Script not found at $script_path"
-        return 1
-    fi
-    local script_output
-    script_output=$("$script_path")
-    eval "$script_output"
-    echo "POD variable set to: $POD"
-}
 
 function clearz() {
   printf "\ec\e[3J";
@@ -206,6 +219,7 @@ function gsqam() {
   git diff origin/$branch
   git push -fu origin $branch
 }
+
 function gsqa() {
   git pull
   branch=$(git branch | grep \* | cut -d ' ' -f2)
