@@ -6,13 +6,12 @@ alias ...="cd ../../.."
 alias ....="cd ../../../.."
 alias cd..="cd .." # Typo addressed.
 
-
 #platform dev
 alias dps="docker ps -a --format \"table {{.Names}}\t{{.ID}}\t{{.Status}}\""
 alias dpsp="docker ps -a --format \"table {{.Names}}\t{{.ID}}\t{{.Status}}\t{{.Ports}}\""
 alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
-alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
+alias datt="docker attach --detach-keys=\"ctrl-c,ctrl-c\""
 
 #k8s
 alias kubectl='kubecolor'
@@ -159,7 +158,10 @@ function berf() {
 }
 
 function gitbra() {
-  git branch -r | grep -v HEAD | while read b; do git log --color --format="%ci _%C(magenta)%cr %C(bold cyan)$b%Creset %s %C(bold blue)<%an>%Creset" $b | head -n 1; done | sort -r | cut -d_ -f2- | sed 's;origin/;;g' | head -10
+  echo "Branch | User | Commit Msg | Age"
+  git branch -r | grep -v HEAD | while read b; do
+    git log --color --format="%C(bold cyan)$b%Creset %C(bold blue)<%an>%Creset %s %C(magenta)%cr%Creset" $b | head -n 1
+  done | sort -r | sed 's;origin/;;g' | head -10
 }
 
 function gitbr() {
@@ -256,7 +258,6 @@ function docker_container_info() {
   done
 }
 
-
 function docker_container_info() {
   echo "Fetching information for all Docker containers...\n"
   
@@ -311,7 +312,6 @@ function katfwd() {
   kubectl port-forward -n "$1" "$pod_name" 3314:1433
 }
 
-
 kat-open() {
     # Capture the output of the 'kat list' command
     local output="$(kat list)"
@@ -330,6 +330,18 @@ kat-open() {
 
 k8c() {
   kubectl $@
+}
+
+function b() {
+    local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
+    if [[ ! -f "$script_path" ]]; then
+        echo "Error: Script not found at $script_path"
+        return 1
+    fi
+    local script_output
+    script_output=$("$script_path" git-branch)
+    eval "$script_output"
+    echo "BRANCH variable set to: $BRANCH"
 }
 
 source ~/.zsh/env.sh
