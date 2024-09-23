@@ -49,6 +49,8 @@ if [ "$resource_type" == "git-branch" ]; then
         # Validate input
         if [[ "$selection" =~ ^[0-9]+$ ]] && [ "$selection" -ge 1 ] && [ "$selection" -le "$num_branches" ]; then
             selected_branch=${branch_names[$selection-1]}
+            # Trim any extra whitespace or special characters
+            selected_branch=$(echo "$selected_branch" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             echo -e "${GREEN}Selected branch: $selected_branch${NC}" >&2
             echo "export BRANCH='$selected_branch'"
             break
