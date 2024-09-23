@@ -205,7 +205,7 @@ function gcr() {
 }
 
 function bs() {
-  local timestamp=$(date +"%Y-%m-%d_%I:%M%p")
+  local timestamp=$(date +"%Y-%m-%d_%I_%M%p")
   local backup_branch="${BRANCH}_backup_${timestamp}"
   git checkout -b $backup_branch
   git checkout $BRANCH
