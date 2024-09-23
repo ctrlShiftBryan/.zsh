@@ -204,6 +204,22 @@ function gcr() {
   git clone  --recurse-submodules $@
 }
 
+function bs() {
+  local timestamp=$(date +"%Y-%m-%d_%I:%M%p")
+  local backup_branch="${BRANCH}_backup_${timestamp}"
+  git checkout -b $backup_branch
+  git checkout $BRANCH
+  git merge main
+  git pull
+  git checkout $BRANCH
+  git merge main
+  git push
+  git checkout main
+  git merge --squash $BRANCH
+  git branch -D $BRANCH
+  git checkout -b $BRANCH
+}
+
 function gsqam() {
   git pull
   branch=$(git branch | grep \* | cut -d ' ' -f2)
