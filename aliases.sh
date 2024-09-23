@@ -15,8 +15,18 @@ alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys="ctrl-c,ctrl-c""
 
 #k8s
+alias kubectl='kubecolor'
 alias k="kubectl"
 alias kgp="k get pods"
+
+function ks() {
+  kubectl get services "$@"
+}
+
+function kdap() {
+  echo "kubectl delete all --all --dry-run=client -o name"
+  kubectl delete all --all --dry-run=client -o name
+}
 
 function kdelp() {
  k delete pod $POD "$@"
