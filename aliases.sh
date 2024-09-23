@@ -205,16 +205,26 @@ function gcr() {
 }
 
 function bs() {
+  # Determine the base branch (main or master)
+  if git show-ref --verify --quiet refs/heads/main; then
+    BASE_BRANCH="main"
+  elif git show-ref --verify --quiet refs/heads/master; then
+    BASE_BRANCH="master"
+  else
+    echo "Error: Neither 'main' nor 'master' branch found."
+    return 1
+  fi
+
   local timestamp=$(date +"%Y-%m-%d_%I_%M%p")
   local backup_branch="${BRANCH}_backup_${timestamp}"
   git checkout -b $backup_branch
   git checkout $BRANCH
-  git merge main
+  git merge $BASE_BRANCH
   git pull
   git checkout $BRANCH
-  git merge main
+  git merge $BASE_BRANCH
   git push
-  git checkout main
+  git checkout $BASE_BRANCH
   git merge --squash $BRANCH
   git branch -D $BRANCH
   git checkout -b $BRANCH
