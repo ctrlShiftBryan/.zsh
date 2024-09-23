@@ -157,15 +157,23 @@ function berf() {
   bundle exec rspec --fail-fast $@
 }
 
-function gitbra() {
-  echo "Branch | User | Commit Msg | Age"
-  git branch -r | grep -v HEAD | while read b; do
-    git log --color --format="%C(bold cyan)$b%Creset %C(bold blue)<%an>%Creset %s %C(magenta)%cr%Creset" $b | head -n 1
-  done | sort -r | sed 's;origin/;;g' | head -10
-}
+# function gitbra() {
+#   echo "Branch | User | Commit Msg | Age"
+#   git branch -r | grep -v HEAD | while read b; do
+#     git log --color --format="%C(bold cyan)$b%Creset %C(bold blue)<%an>%Creset %s %C(magenta)%cr%Creset" $b | head -n 1
+#   done | sort -r | sed 's;origin/;;g' | head -10
+# }
 
-function gitbr() {
-  git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:red)%(objectname:short)%(color:reset);%(color:yellow)%(refname:short)%(color:reset);(%(color:green)%(committerdate:relative)%(color:reset));%(authorname);%(contents:subject)' | column -t -s ';'
+function gitbra() {
+  echo "Branch | sha | Age | User | Commit Msg"
+
+
+
+
+  git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short); %(objectname:short); %(committerdate:relative);%(authorname);%(contents:subject)' | \
+  awk -F';' '{
+    printf "\033[34m%s\033[0m \033[33m%s\033[0m \033[32m%s\033[0m \033[36m%s\033[0m \033[35m%s\033[0m\n", $1, $2, $3, $4, $5, $6
+  }' | column -t -s ' '
 }
 
 function dri() {
