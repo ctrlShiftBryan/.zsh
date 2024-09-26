@@ -5,6 +5,7 @@ alias ..="cd ../.."
 alias ...="cd ../../.."
 alias ....="cd ../../../.."
 alias cd..="cd .." # Typo addressed.
+alias codei="code-insiders"
 
 #platform dev
 alias dps="docker ps -a --format \"table {{.Names}}\t{{.ID}}\t{{.Status}}\""
@@ -17,6 +18,10 @@ alias datt="docker attach --detach-keys=\"ctrl-c,ctrl-c\""
 alias kubectl='kubecolor'
 alias k="kubectl"
 alias kgp="k get pods"
+
+function kpf() {
+  k port-forward svc/$SERVICE "$@"
+}
 
 function p() {
     local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
