@@ -80,6 +80,14 @@ function kberc() {
   k exec -it $POD -- bundle exec rails c
 }
 
+# cmm helm
+function dh() {
+  cd ~/code/kubernetes
+  echo "Creating namespace $1 and installing helm chart $1"
+  kubectl create namespace $1
+  helm upgrade --install $1 ./helm/argocd-app-charts/argocd-app-$1 --namespace $1 --set global.ingressDomain=$(kubectl config current-context).kat.cmmaz.cloud
+}
+
 ## create executable bash script
 function xbash() {
   echo "" > $1
