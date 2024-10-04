@@ -128,6 +128,16 @@ function dci () {
   docker run -it -v $(pwd):/app $@ sh
 }
 
+function bc () {
+ git checkout $BRANCH
+}
+
+function a() {
+  # aider --model openai/openrouter/openai/o1-preview --architect --editor-model anthropic/claude-3-5-sonnet-20240620
+  # aider --model anthropic/claude-3-5-sonnet-20240620
+  aider --model openrouter/openai/o1-preview --architect --editor-model anthropic/claude-3-5-sonnet-20240620
+} 
+
 function gcr () {
   git clone --recurse-submodules $@
 }
@@ -326,6 +336,12 @@ function docker_container_info() {
     echo "Image Size: $human_readable_size"
     echo "\n---\n"
   done
+}
+
+function kreadme() {
+  CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
+  URL="https://readme.$CLUSTER_NAME.kat.cmmaz.cloud/"
+  open $URL
 }
 
 function kat() {
