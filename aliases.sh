@@ -338,7 +338,19 @@ function docker_container_info() {
   done
 }
 
-function kreadme() {
+function katop() {
+  CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
+  URL="https://readme.$1.kat.cmmaz.cloud/_ping"
+  open $URL
+}
+
+function kato() {
+  CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
+  URL="https://readme.$1.kat.cmmaz.cloud/"
+  open $URL
+}
+
+function katr() {
   CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
   URL="https://readme.$CLUSTER_NAME.kat.cmmaz.cloud/"
   open $URL
