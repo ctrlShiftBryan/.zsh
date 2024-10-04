@@ -340,13 +340,13 @@ function docker_container_info() {
 
 function katop() {
   CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
-  URL="https://readme.$1.kat.cmmaz.cloud/_ping"
+  URL="https://$1.$CLUSTER_NAME.kat.cmmaz.cloud/_ping"
   open $URL
 }
 
 function kato() {
   CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[].name}')
-  URL="https://readme.$1.kat.cmmaz.cloud/"
+  URL="https://$1.$CLUSTER_NAME.kat.cmmaz.cloud/"
   open $URL
 }
 
