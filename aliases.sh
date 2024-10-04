@@ -356,6 +356,21 @@ function katr() {
   open $URL
 }
 
+function local-kat() {
+  LOCAL_KAT_IMAGE=${LOCAL_KAT_IMAGE:-registry.cmmint.net/platform/local-kat:latest}
+  [[ ! -f $HOME/.local-kat-update-check || -n $(find $HOME/.local-kat-update-check \
+    -type f -mtime +48h) ]] && \
+    docker pull $LOCAL_KAT_IMAGE && touch $HOME/.local-kat-update-check
+
+  docker run --rm -it \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -e KUBECONFIG=/kube/config \
+    -v "${HOME}/.kube:/kube" \
+    -v "${HOME}/.local-kat:/local-kat" \
+    -e CLIENT_HOME="${HOME}" \
+    "$LOCAL_KAT_IMAGE" "$@"
+}
+
 function kat() {
   IMAGE=${IMAGE:-registry.cmmint.net/platform/kat:latest}
   # Auto-update, but only check once every 48h
