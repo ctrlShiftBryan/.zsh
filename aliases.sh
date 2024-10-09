@@ -430,4 +430,5 @@ function b() {
     echo "BRANCH variable set to: $BRANCH"
 }
 
+source ~/.zsh/local.sh
 source ~/.zsh/env.sh
