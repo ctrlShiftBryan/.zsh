@@ -189,9 +189,9 @@ function berf() {
 
 function gitbra() {
   echo "Branch | sha | Age | User | Commit Msg"
-  git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short); %(objectname:short); %(committerdate:relative);%(authorname);%(contents:subject)' | \
+  git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short); %(objectname:short); %(committerdate:relative);%(authorname)' | \
   awk -F';' '{
-    printf "%s \033[33m%s\033[0m \033[32m%s\033[0m \033[36m%s\033[0m \033[35m%s\033[0m\n", $1, $2, $3, $4, $5, $6
+    printf "%s \033[33m%s\033[0m \033[32m%s\033[0m \033[36m%s\033[0m \033[35m%s\033[0m\n", $1, $2, $3, $4, $5
   }' | column -t -s ' '
 }
 
@@ -428,6 +428,22 @@ function b() {
     script_output=$("$script_path" git-branch)
     eval "$script_output"
     echo "BRANCH variable set to: $BRANCH"
+}
+
+function kill-port() {
+  if [ -z "$1" ]; then
+    echo "Usage: kill-port <port_number>"
+    return 1
+  fi
+  
+  local pid=$(lsof -ti tcp:$1)
+  if [ -z "$pid" ]; then
+    echo "No process found running on port $1"
+    return 1
+  fi
+  
+  echo "Killing process $pid running on port $1"
+  kill -9 $pid
 }
 
 source ~/.zsh/local.sh
