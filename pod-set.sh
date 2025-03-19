@@ -10,13 +10,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check if an argument is provided
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <pods|services|git-branch>" >&2
+# Check if at least one argument is provided
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <pods|services|git-branch> [-A]" >&2
     exit 1
 fi
 
-# Set the resource type based on the argument
+# Set the resource type based on the first argument
 resource_type="$1"
 
 if [ "$resource_type" == "git-branch" ]; then
@@ -59,8 +59,13 @@ if [ "$resource_type" == "git-branch" ]; then
         fi
     done
 else
+
     # Run kubectl get pods/services and store the output
-    kubectl_output=$(kubectl get $resource_type)
+    if [ "$2" == "-A" ]; then
+        kubectl_output=$(kubectl get $resource_type -A)
+    else
+        kubectl_output=$(kubectl get $resource_type)
+    fi
 
     # Extract the header
     header=$(echo "$kubectl_output" | head -n 1)

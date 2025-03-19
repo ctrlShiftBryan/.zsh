@@ -23,6 +23,7 @@ function kpf() {
   k port-forward svc/$SERVICE "$@"
 }
 
+
 function p() {
     local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
     if [[ ! -f "$script_path" ]]; then
@@ -31,6 +32,18 @@ function p() {
     fi
     local script_output
     script_output=$("$script_path" pods)
+    eval "$script_output"
+    echo "POD variable set to: $POD"
+}
+
+function pa() {
+    local script_path="$HOME/.zsh/pod-set.sh"  # Adjust this path as needed
+    if [[ ! -f "$script_path" ]]; then
+        echo "Error: Script not found at $script_path"
+        return 1
+    fi
+    local script_output
+    script_output=$("$script_path" pods -A)
     eval "$script_output"
     echo "POD variable set to: $POD"
 }
