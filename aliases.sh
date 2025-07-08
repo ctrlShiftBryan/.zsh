@@ -1,4 +1,128 @@
+#
+alias docker=podman
+alias docker-compose=podman-compose
+
+# claude code
+# claude 
+alias cc="claude"
+alias ccc="claude --resume query"
+alias ccd="claude --dangerously-skip-permissions"
+alias cccd="claude --dangerously-skip-permissions --resume query"
+
+# claude worktree versions
+function ccw() {
+    local current_dir=$(basename "$PWD")
+    local worktrees_dir="../${current_dir}-worktrees"
+    
+    # Check if worktrees folder exists, create if not
+    if [[ ! -d "$worktrees_dir" ]]; then
+        echo "Creating worktrees directory: $worktrees_dir"
+        mkdir -p "$worktrees_dir"
+    fi
+    
+    claude --add-dir "$worktrees_dir" "$@"
+}
+
+function cccw() {
+    local current_dir=$(basename "$PWD")
+    local worktrees_dir="../${current_dir}-worktrees"
+    
+    # Check if worktrees folder exists, create if not
+    if [[ ! -d "$worktrees_dir" ]]; then
+        echo "Creating worktrees directory: $worktrees_dir"
+        mkdir -p "$worktrees_dir"
+    fi
+    
+    claude --resume query --add-dir "$worktrees_dir" "$@"
+}
+
+function ccdw() {
+    local current_dir=$(basename "$PWD")
+    local worktrees_dir="../${current_dir}-worktrees"
+    
+    # Check if worktrees folder exists, create if not
+    if [[ ! -d "$worktrees_dir" ]]; then
+        echo "Creating worktrees directory: $worktrees_dir"
+        mkdir -p "$worktrees_dir"
+    fi
+    
+    claude --dangerously-skip-permissions --add-dir "$worktrees_dir" "$@"
+}
+
+function cccdw() {
+    local current_dir=$(basename "$PWD")
+    local worktrees_dir="../${current_dir}-worktrees"
+    
+    # Check if worktrees folder exists, create if not
+    if [[ ! -d "$worktrees_dir" ]]; then
+        echo "Creating worktrees directory: $worktrees_dir"
+        mkdir -p "$worktrees_dir"
+    fi
+    
+    claude --dangerously-skip-permissions --resume query --add-dir "$worktrees_dir" "$@"
+}
+
+# git worktree helper
+function gw() {
+    # Check if branch name is provided
+    if [[ -z "$1" ]]; then
+        echo "Error: Please provide a branch name"
+        echo "Usage: gw <branch-name>"
+        return 1
+    fi
+    
+    # Get current branch
+    local current_branch=$(git branch --show-current)
+    
+    # Check if on main or master
+    if [[ "$current_branch" != "main" && "$current_branch" != "master" ]]; then
+        echo "Error: You must be on 'main' or 'master' branch to create a worktree"
+        echo "Current branch: $current_branch"
+        return 1
+    fi
+    
+    # Get current directory name
+    local current_dir=$(basename "$PWD")
+    local worktrees_dir="../${current_dir}-worktrees"
+    local new_worktree_path="${worktrees_dir}/$1"
+    
+    # Check if worktree path already exists
+    if [[ -d "$new_worktree_path" ]]; then
+        echo "Worktree already exists at: $new_worktree_path"
+        echo "Changing to existing worktree directory..."
+        cd "$new_worktree_path"
+        echo "Changed to worktree directory: $PWD"
+        return 0
+    fi
+    
+    # Check if branch already exists
+    if git show-ref --verify --quiet "refs/heads/$1"; then
+        echo "Branch '$1' already exists"
+        echo "Creating worktree with existing branch..."
+        # Create worktrees directory if it doesn't exist
+        if [[ ! -d "$worktrees_dir" ]]; then
+            echo "Creating worktrees directory: $worktrees_dir"
+            mkdir -p "$worktrees_dir"
+        fi
+        git worktree add "$new_worktree_path" "$1"
+    else
+        # Create worktrees directory if it doesn't exist
+        if [[ ! -d "$worktrees_dir" ]]; then
+            echo "Creating worktrees directory: $worktrees_dir"
+            mkdir -p "$worktrees_dir"
+        fi
+        # Create new branch and worktree
+        echo "Creating new branch '$1' and worktree at: $new_worktree_path"
+        git worktree add "$new_worktree_path" -b "$1"
+    fi
+    
+    # Change to the new worktree directory
+    cd "$new_worktree_path"
+    echo "Changed to worktree directory: $PWD"
+}
+
 # Easier directory navigation.
+
 alias ~="cd ~"
 # alias .="cd .."
 alias ..="cd ../.."
