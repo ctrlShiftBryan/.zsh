@@ -784,5 +784,46 @@ ziprestore() {
     echo "📦 Extracted: $size"
 }
 
+# Preview clipboard size (for zipped content)
+zippreview() {
+    # Check if clipboard contains base64 data
+    if ! pbpaste | base64 -d >/dev/null 2>&1; then
+        echo "❌ Clipboard doesn't contain valid base64-encoded zip data"
+        return 1
+    fi
+    
+    # Get clipboard content size
+    local clipboard_size=$(pbpaste | wc -c | awk '{print $1}')
+    local human_size=$(echo "$clipboard_size" | awk '
+        function human(x) {
+            s=" B  KB MB GB"
+            split(s,v," ")
+            x += 0
+            for(i=1; x>=1024 && i<5; i++) x/=1024
+            return sprintf("%.2f %s", x, v[i])
+        }
+        {print human($1)}'
+    )
+    
+    # Try to get uncompressed size
+    local tempfile=$(mktemp).zip
+    pbpaste | base64 -d > "$tempfile" 2>/dev/null
+    
+    if [ -f "$tempfile" ]; then
+        local zip_size=$(ls -lh "$tempfile" | awk '{print $5}')
+        local file_count=$(unzip -l "$tempfile" 2>/dev/null | tail -1 | awk '{print $2}')
+        rm "$tempfile"
+        
+        echo "📋 Clipboard contains zipped data:"
+        echo "   Base64 size: $human_size"
+        echo "   Zip size: $zip_size"
+        if [ ! -z "$file_count" ]; then
+            echo "   Files: $file_count"
+        fi
+    else
+        echo "📋 Clipboard size: $human_size (base64)"
+    fi
+}
+
 source ~/.zsh/local.sh
 source ~/.zsh/env.sh
