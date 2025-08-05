@@ -1,13 +1,28 @@
-#
-alias docker=podman
-alias docker-compose=podman-compose
-
 # claude code
 # claude 
-alias cc="claude"
-alias ccc="claude --resume query"
-alias ccd="claude --dangerously-skip-permissions"
-alias cccd="claude --dangerously-skip-permissions --resume query"
+# Function to preserve original directory for hooks
+cc() {
+    export CLAUDE_ORIGINAL_DIR="$PWD"
+    claude "$@"
+}
+ccc() {
+    export CLAUDE_ORIGINAL_DIR="$PWD"
+    claude --resume query "$@"
+}
+ccd() {
+    export CLAUDE_ORIGINAL_DIR="$PWD"
+    claude --dangerously-skip-permissions "$@"
+}
+cccd() {
+    export CLAUDE_ORIGINAL_DIR="$PWD"
+    claude --dangerously-skip-permissions --resume query "$@"
+}
+
+sshs() {
+    ssh -t "$1" "cd ~/dotfiles && git pull --rebase 2>/dev/null || git clone git@github.com:ctrlShiftBryan/dotfiles.git ~/dotfiles; cd ~/dotfiles && ./setup.sh; exec \$SHELL"
+}
+
+alias opr='~/.zsh/opr'
 
 # claude worktree versions
 function ccw() {
@@ -121,6 +136,135 @@ function gw() {
     echo "Changed to worktree directory: $PWD"
 }
 
+# git worktree back - navigate back to main repository from worktree
+function gwb() {
+    # Check if in a git repository
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Error: Not in a git repository"
+        return 1
+    fi
+    
+    # Get the worktree path
+    local worktree_path=$(git rev-parse --show-toplevel)
+    
+    # Check if we're in a worktree (not the main repo)
+    local git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null)
+    if [[ "$git_common_dir" == "$(git rev-parse --git-dir)" ]]; then
+        echo "Error: You are not in a worktree. Already in the main repository."
+        return 1
+    fi
+    
+    # Get the main repository path by parsing the worktree path
+    # Remove everything after and including "-worktrees" from the path
+    local main_repo_path="${worktree_path%-worktrees/*}"
+    
+    # Check if we successfully extracted the main repo path
+    if [[ "$main_repo_path" == "$worktree_path" ]]; then
+        echo "Error: Unable to determine main repository path. Are you in a worktree created with 'gw'?"
+        return 1
+    fi
+    
+    # Change to main repository
+    cd "$main_repo_path"
+    echo "Changed to main repository: $PWD"
+}
+
+# git worktree merge - merges worktree branch back to main and removes worktree
+function gwm() {
+    # Get current branch
+    local current_branch=$(git branch --show-current)
+    
+    # Check if in a worktree
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Error: Not in a git repository"
+        return 1
+    fi
+    
+    # Get the worktree path
+    local worktree_path=$(git rev-parse --show-toplevel)
+    
+    # Check if we're in a worktree (not the main repo)
+    local git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null)
+    if [[ "$git_common_dir" == "$(git rev-parse --git-dir)" ]]; then
+        echo "Error: You are not in a worktree. This command should be run from within a worktree."
+        return 1
+    fi
+    
+    # Determine the main branch (main or master)
+    local main_branch
+    if git show-ref --verify --quiet refs/heads/main; then
+        main_branch="main"
+    elif git show-ref --verify --quiet refs/heads/master; then
+        main_branch="master"
+    else
+        echo "Error: Neither 'main' nor 'master' branch found."
+        return 1
+    fi
+    
+    # Get the main repository path by parsing the worktree path
+    # Remove everything after and including "-worktrees" from the path
+    local main_repo_path="${worktree_path%-worktrees/*}"
+    
+    # Check if we successfully extracted the main repo path
+    if [[ "$main_repo_path" == "$worktree_path" ]]; then
+        echo "Error: Unable to determine main repository path. Are you in a worktree created with 'gw'?"
+        return 1
+    fi
+    
+    echo "Current branch: $current_branch"
+    echo "Worktree path: $worktree_path"
+    echo "Main repo path: $main_repo_path"
+    echo ""
+    echo "This will:"
+    echo "1. Switch to main repository"
+    echo "2. Merge branch '$current_branch' into '$main_branch'"
+    echo "3. Remove the worktree"
+    echo ""
+    echo -n "Continue? (y/N): "
+    read -r REPLY
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        return 1
+    fi
+    
+    # Change to main repository
+    cd "$main_repo_path"
+    
+    # Ensure we're on the main branch
+    git checkout "$main_branch"
+    
+    # Pull latest changes
+    echo "Pulling latest changes on $main_branch..."
+    git pull
+    
+    # Merge the worktree branch
+    echo "Merging branch '$current_branch' into '$main_branch'..."
+    if git merge "$current_branch"; then
+        echo "✓ Successfully merged '$current_branch' into '$main_branch'"
+        
+        # Remove the worktree
+        echo "Removing worktree..."
+        git worktree remove "$worktree_path"
+        echo "✓ Worktree removed"
+        
+        # Optionally delete the branch
+        echo ""
+        echo -n "Delete branch '$current_branch'? (y/N): "
+        read -r REPLY
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            git branch -d "$current_branch"
+            echo "✓ Branch '$current_branch' deleted"
+        fi
+        
+        echo ""
+        echo "✓ All done! You are now on '$main_branch' in the main repository."
+    else
+        echo "✗ Merge failed. Please resolve conflicts and complete the merge manually."
+        echo "  The worktree has NOT been removed."
+        return 1
+    fi
+}
+
 # Easier directory navigation.
 
 alias ~="cd ~"
@@ -137,6 +281,11 @@ alias dpsp="docker ps -a --format \"table {{.Names}}\t{{.ID}}\t{{.Status}}\t{{.P
 alias dpsi="docker ps -a --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\""
 alias yad="yarn add --ignore-engines --dev"
 alias datt="docker attach --detach-keys=\"ctrl-c,ctrl-c\""
+
+# Remove all stopped containers
+function drs() {
+  docker rm $(docker ps -a -q -f status=exited) 2>/dev/null || echo "No stopped containers to remove"
+}
 
 #k8s
 alias kubectl='kubecolor'
@@ -573,14 +722,63 @@ function kill-port() {
     return 1
   fi
   
-  local pid=$(lsof -ti tcp:$1)
-  if [ -z "$pid" ]; then
+  local pids=$(lsof -ti tcp:$1)
+  if [ -z "$pids" ]; then
     echo "No process found running on port $1"
     return 1
   fi
   
-  echo "Killing process $pid running on port $1"
-  kill -9 $pid
+  # Convert newlines to spaces and count PIDs
+  local pid_array=(${(f)pids})
+  local count=${#pid_array[@]}
+  
+  if [ $count -eq 1 ]; then
+    echo "Killing process $pids running on port $1"
+  else
+    echo "Killing $count processes running on port $1: ${pid_array[@]}"
+  fi
+  
+  # Kill each PID separately
+  for pid in $pid_array; do
+    kill -9 $pid 2>/dev/null
+  done
+  
+  echo "Done"
+}
+
+# Zip to clipboard with size reporting
+zipclip() {
+    local tempfile=$(mktemp)
+    
+    if [ -d "$1/.git" ]; then
+        # Git repo - use git archive
+        (cd "$1" && git archive --format=zip HEAD) | base64 > "$tempfile"
+        echo "✓ Archived $1 (git tracked files) to clipboard"
+    else
+        # Not a git repo - exclude common stuff
+        zip -r - "$1" -x "*.git*" "*.DS_Store" "*node_modules*" | base64 > "$tempfile"
+        echo "✓ Zipped $1 to clipboard"
+    fi
+    
+    # Get size and copy to clipboard
+    local size=$(ls -lh "$tempfile" | awk '{print $5}')
+    cat "$tempfile" | pbcopy
+    rm "$tempfile"
+    
+    echo "📋 Clipboard size: $size"
+}
+
+# Paste clipboard to zip with size reporting
+clipzip() {
+    local tempfile=$(mktemp)
+    pbpaste | base64 -d > "$tempfile"
+    
+    # Get decoded size
+    local size=$(ls -lh "$tempfile" | awk '{print $5}')
+    mv "$tempfile" "$1"
+    
+    echo "✓ Created $1"
+    echo "📦 File size: $size"
 }
 
 source ~/.zsh/local.sh
