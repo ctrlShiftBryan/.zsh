@@ -746,18 +746,18 @@ function kill-port() {
   echo "Done"
 }
 
-# Zip to clipboard with size reporting
+# Zip current directory to clipboard
 zipclip() {
     local tempfile=$(mktemp)
     
-    if [ -d "$1/.git" ]; then
+    if [ -d ".git" ]; then
         # Git repo - use git archive
-        (cd "$1" && git archive --format=zip HEAD) | base64 > "$tempfile"
-        echo "✓ Archived $1 (git tracked files) to clipboard"
+        git archive --format=zip HEAD | base64 > "$tempfile"
+        echo "✓ Archived current directory (git tracked files) to clipboard"
     else
         # Not a git repo - exclude common stuff
-        zip -r - "$1" -x "*.git*" "*.DS_Store" "*node_modules*" | base64 > "$tempfile"
-        echo "✓ Zipped $1 to clipboard"
+        zip -r - . -x "*.git*" "*.DS_Store" "*node_modules*" | base64 > "$tempfile"
+        echo "✓ Zipped current directory to clipboard"
     fi
     
     # Get size and copy to clipboard
@@ -768,17 +768,20 @@ zipclip() {
     echo "📋 Clipboard size: $size"
 }
 
-# Paste clipboard to zip with size reporting
-clipzip() {
-    local tempfile=$(mktemp)
+# Restore from clipboard to current directory
+ziprestore() {
+    local tempfile=$(mktemp).zip
     pbpaste | base64 -d > "$tempfile"
     
-    # Get decoded size
+    # Get size
     local size=$(ls -lh "$tempfile" | awk '{print $5}')
-    mv "$tempfile" "$1"
     
-    echo "✓ Created $1"
-    echo "📦 File size: $size"
+    # Extract to current directory
+    unzip -o "$tempfile"
+    rm "$tempfile"
+    
+    echo "✓ Restored from clipboard"
+    echo "📦 Extracted: $size"
 }
 
 source ~/.zsh/local.sh
